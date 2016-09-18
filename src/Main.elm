@@ -8,12 +8,12 @@ import WebSocket
 
 main : Program Never
 main =
-    Html.program
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
+  Html.program
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }
 
 
 
@@ -28,12 +28,12 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    Model "" []
+  Model "" []
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.none )
+  ( initialModel, Cmd.none )
 
 
 
@@ -41,22 +41,22 @@ init =
 
 
 type Msg
-    = Input String
-    | Send
-    | NewMessage String
+  = Input String
+  | Send
+  | NewMessage String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg {input, messages} =
-    case msg of
-        Input newInput ->
-          (Model newInput messages, Cmd.none)
+  case msg of
+    Input newInput ->
+      (Model newInput messages, Cmd.none)
 
-        Send ->
-          (Model "" messages, WebSocket.send "ws://echo.websocket.org" input)
+    Send ->
+      (Model "" messages, WebSocket.send "ws://echo.websocket.org" input)
 
-        NewMessage str ->
-          (Model input (str :: messages), Cmd.none)
+    NewMessage str ->
+      (Model input (str :: messages), Cmd.none)
 
 
 
@@ -65,7 +65,7 @@ update msg {input, messages} =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen "ws://echo.websocket.org" NewMessage
+  WebSocket.listen "ws://echo.websocket.org" NewMessage
 
 
 
@@ -74,12 +74,12 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div [] (List.map viewMessage model.messages)
-        , input [onInput Input] []
-        , button [onClick Send] [text "Send"]
-        ]
+  div []
+    [ div [] (List.map viewMessage model.messages)
+    , input [onInput Input] []
+    , button [onClick Send] [text "Send"]
+    ]
 
 viewMessage : String -> Html msg
 viewMessage msg =
-    div [] [ text msg ]
+  div [] [ text msg ]
