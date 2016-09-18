@@ -23,7 +23,7 @@ main =
 type alias Model =
   { user : User
   , nameInput : String
-  , input : String
+  , messageInput : String
   , messages : List String
   }
 
@@ -48,27 +48,27 @@ init =
 
 
 type Msg
-  = Input String
+  = MessageInput String
+  | NameInput String
   | Send
   | NewMessage String
-  | NameInput String
   | SetName
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    Input newInput ->
-      ({model | input = newInput}, Cmd.none)
-
-    Send ->
-      ({model | input = ""}, WebSocket.send "ws://echo.websocket.org" model.input)
-
-    NewMessage str ->
-      ({model | messages = (str :: model.messages)}, Cmd.none)
+    MessageInput newInput ->
+      ({model | messageInput = newInput}, Cmd.none)
 
     NameInput newInput ->
       ({model | nameInput = newInput}, Cmd.none)
+
+    Send ->
+      ({model | messageInput = ""}, WebSocket.send "ws://echo.websocket.org" model.messageInput)
+
+    NewMessage str ->
+      ({model | messages = (str :: model.messages)}, Cmd.none)
 
     SetName ->
       ({model | user = Named model.nameInput}, Cmd.none)
@@ -120,7 +120,7 @@ messages : Model -> Html Msg
 messages model =
   div []
     [ div [] (List.reverse (List.map viewMessage model.messages))
-    , input [onInput Input] []
+    , input [onInput MessageInput] []
     , button [onClick Send] [text "Send"]
     ]
 
