@@ -24,13 +24,19 @@ type alias Model =
   { user : User
   , nameInput : String
   , messageInput : String
-  , messages : List String
+  , messages : List Message
   }
 
 
 type User
   = Anonymous
   | Named String
+
+
+type alias Message =
+  { content : String
+  , user : String
+  }
 
 
 initialModel : Model
@@ -68,11 +74,15 @@ update msg model =
       ({model | messageInput = ""}, WebSocket.send "ws://echo.websocket.org" model.messageInput)
 
     NewMessage str ->
-      ({model | messages = (str :: model.messages)}, Cmd.none)
+      ({model | messages = addMessage str model}, Cmd.none)
 
     SetName ->
       ({model | user = Named model.nameInput}, Cmd.none)
 
+
+addMessage : String -> Model -> List Message
+addMessage content model =
+  Message content (nameOf model.user) :: model.messages
 
 
 -- SUBSCRIPTIONS
@@ -124,6 +134,6 @@ messages model =
     , button [onClick Send] [text "Send"]
     ]
 
-viewMessage : String -> Html msg
-viewMessage msg =
-  div [] [ text msg ]
+viewMessage : Message -> Html msg
+viewMessage message =
+  div [] [ text (message.user ++ ": " ++ message.content) ]
