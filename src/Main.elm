@@ -1,10 +1,9 @@
 
 import Html exposing (..)
 import Html.App as Html
+import Html.Events exposing (onClick, onInput)
+import WebSocket
 
-
---import Html.Attributes exposing (..)
---import Html.Events exposing (onClick)
 
 
 main : Program Never
@@ -22,12 +21,14 @@ main =
 
 
 type alias Model =
-    {}
+  { input : String
+  , messages : List String
+  }
 
 
 initialModel : Model
 initialModel =
-    {}
+    Model "" []
 
 
 init : ( Model, Cmd Msg )
@@ -40,14 +41,22 @@ init =
 
 
 type Msg
-    = NoOp
+    = Input String
+    | Send
+    | NewMessage String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg {input, messages} =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
+        Input newInput ->
+          (Model newInput messages, Cmd.none)
+
+        Send ->
+          (Model "" messages, WebSocket.send "ws://echo.websocket.org" input)
+
+        NewMessage str ->
+          (Model input (str :: messages), Cmd.none)
 
 
 
@@ -56,7 +65,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    WebSocket.listen "ws://echo.websocket.org" NewMessage
 
 
 
@@ -66,6 +75,11 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text "Hello, world!"
-        , text (toString model)
+        [ div [] (List.map viewMessage model.messages)
+        , input [onInput Input] []
+        , button [onClick Send] [text "Send"]
         ]
+
+viewMessage : String -> Html msg
+viewMessage msg =
+    div [] [ text msg ]
