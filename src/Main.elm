@@ -3,6 +3,8 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.App as Html
 import Html.Events exposing (onClick, onInput)
+import Json.Encode as Encode
+import Json.Decode as Decode exposing (..)
 import WebSocket
 
 
@@ -71,13 +73,61 @@ update msg model =
             ( { model | nameInput = newInput }, Cmd.none )
 
         Send ->
-            ( { model | messageInput = "" }, WebSocket.send "ws://echo.websocket.org" model.messageInput )
+            ( { model | messageInput = "" }, WebSocket.send "ws://echo.websocket.org" (newMessageJson model) )
 
-        NewMessage str ->
-            ( { model | messages = addMessage str model }, Cmd.none )
+        NewMessage json ->
+            ( { model | messages = (decodeMessage json) :: model.messages }, Cmd.none )
 
         SetName ->
             ( { model | user = Named model.nameInput }, Cmd.none )
+
+
+newMessageJson : Model -> String
+newMessageJson model =
+    let
+        message =
+            Message model.messageInput (nameOf model.user)
+    in
+        encodeMessage message
+
+
+encodeMessage : Message -> String
+encodeMessage message =
+    Encode.encode 0 (messageEncodeFormat message)
+
+
+messageEncodeFormat : Message -> Encode.Value
+messageEncodeFormat message =
+    Encode.object
+        [ ( "content", Encode.string message.content )
+        , ( "user", Encode.string message.user )
+        ]
+
+
+decodeMessage : String -> Message
+decodeMessage json =
+    let
+        result =
+            attemptDecodeMessage json
+    in
+        case result of
+            Ok message ->
+                message
+
+            Err error ->
+                -- TODO: Handle this better - with message type for errors?
+                Message error "ERROR"
+
+
+attemptDecodeMessage : String -> Result String Message
+attemptDecodeMessage json =
+    let
+        decoder =
+            Decode.object2 Message
+                ("content" := Decode.string)
+                ("user" := Decode.string)
+    in
+        Decode.decodeString decoder json
 
 
 addMessage : String -> Model -> List Message
