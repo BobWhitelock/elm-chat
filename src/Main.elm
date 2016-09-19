@@ -130,11 +130,6 @@ attemptDecodeMessage json =
         Decode.decodeString decoder json
 
 
-addMessage : String -> Model -> List Message
-addMessage content model =
-    Message content (nameOf model.user) :: model.messages
-
-
 
 -- SUBSCRIPTIONS
 
