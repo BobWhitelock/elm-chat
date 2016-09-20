@@ -1,6 +1,6 @@
 
-.PHONY: all
-all: app view
+.PHONY: start
+start: app view
 
 .PHONY: app
 app:
@@ -10,3 +10,7 @@ app:
 view:
 	xdg-open http://localhost:8000
 	cd build && python -m SimpleHTTPServer 8000
+
+.PHONY: server
+server:
+	node faye_server/server.js
