@@ -5,7 +5,7 @@ import Html.App as Html
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (..)
-import WebSocket
+import Ports exposing (sendMessage, receiveMessage)
 
 
 main : Program Never
@@ -59,7 +59,7 @@ type Msg
     = MessageInput String
     | NameInput String
     | Send
-    | NewMessage String
+    | NewMessage Encode.Value
     | SetName
 
 
@@ -73,7 +73,7 @@ update msg model =
             ( { model | nameInput = newInput }, Cmd.none )
 
         Send ->
-            ( { model | messageInput = "" }, WebSocket.send "ws://echo.websocket.org" (newMessageJson model) )
+            ( { model | messageInput = "" }, sendMessage (newMessageJson model) )
 
         NewMessage json ->
             ( { model | messages = (decodeMessage json) :: model.messages }, Cmd.none )
@@ -82,7 +82,7 @@ update msg model =
             ( { model | user = Named model.nameInput }, Cmd.none )
 
 
-newMessageJson : Model -> String
+newMessageJson : Model -> Encode.Value
 newMessageJson model =
     let
         message =
@@ -91,20 +91,15 @@ newMessageJson model =
         encodeMessage message
 
 
-encodeMessage : Message -> String
+encodeMessage : Message -> Encode.Value
 encodeMessage message =
-    Encode.encode 0 (messageEncodeFormat message)
-
-
-messageEncodeFormat : Message -> Encode.Value
-messageEncodeFormat message =
     Encode.object
         [ ( "content", Encode.string message.content )
         , ( "user", Encode.string message.user )
         ]
 
 
-decodeMessage : String -> Message
+decodeMessage : Encode.Value -> Message
 decodeMessage json =
     let
         result =
@@ -119,7 +114,7 @@ decodeMessage json =
                 Message error "ERROR"
 
 
-attemptDecodeMessage : String -> Result String Message
+attemptDecodeMessage : Encode.Value -> Result String Message
 attemptDecodeMessage json =
     let
         decoder =
@@ -127,7 +122,7 @@ attemptDecodeMessage json =
                 ("content" := Decode.string)
                 ("user" := Decode.string)
     in
-        Decode.decodeString decoder json
+        Decode.decodeValue decoder json
 
 
 
@@ -136,7 +131,7 @@ attemptDecodeMessage json =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen "ws://echo.websocket.org" NewMessage
+    receiveMessage NewMessage
 
 
 
