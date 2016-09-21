@@ -7,6 +7,7 @@ import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing ((:=))
 import String
+import List
 import Ports exposing (sendMessage, receiveMessage)
 
 
@@ -78,7 +79,7 @@ update msg model =
             ( { model | messageInput = "" }, sendMessage (newMessageJson model) )
 
         NewMessage json ->
-            ( { model | messages = (decodeMessage json) :: model.messages }, Cmd.none )
+            ( { model | messages = (List.append model.messages [ decodeMessage json ]) }, Cmd.none )
 
         SetName ->
             ( { model | user = Named model.nameInput, nameInput = "" }, Cmd.none )
@@ -183,7 +184,7 @@ nameInput model =
 messages : Model -> Html Msg
 messages model =
     div []
-        [ div [] (List.reverse (List.map viewMessage model.messages))
+        [ div [] (List.map viewMessage model.messages)
         , messageInput model
         ]
 
