@@ -76,13 +76,26 @@ update msg model =
             ( { model | nameInput = newInput }, Cmd.none )
 
         Send ->
-            ( { model | messageInput = "" }, sendMessage (newMessageJson model) )
+            ( { model
+                | messageInput = ""
+              }
+            , sendMessage (newMessageJson model)
+            )
 
         NewMessage json ->
-            ( { model | messages = (List.append model.messages [ decodeMessage json ]) }, Cmd.none )
+            ( { model
+                | messages = (List.append model.messages [ decodeMessage json ])
+              }
+            , Cmd.none
+            )
 
         SetName ->
-            ( { model | user = Named model.nameInput, nameInput = "" }, Cmd.none )
+            ( { model
+                | user = Named model.nameInput
+                , nameInput = ""
+              }
+            , Cmd.none
+            )
 
 
 newMessageJson : Model -> Encode.Value
