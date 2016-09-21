@@ -7,5 +7,5 @@ repl-temp-*
 # Built elm bundle.
 build/app.js
 
-# Faye server dependencies.
-faye_server/node_modules/
+# NPM dependencies - development tools and for Faye server.
+node_modules/
