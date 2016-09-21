@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing ((:=))
+import String
 import Ports exposing (sendMessage, receiveMessage)
 
 
@@ -167,7 +168,11 @@ nameInput : Model -> Html Msg
 nameInput model =
     div []
         [ input [ (onInput NameInput), (value model.nameInput) ] []
-        , button [ onClick SetName ] [ text "Set Name" ]
+        , button
+            [ (onClick SetName)
+            , (disabled (String.isEmpty model.nameInput))
+            ]
+            [ text "Set Name" ]
         ]
 
 
@@ -176,7 +181,11 @@ messages model =
     div []
         [ div [] (List.reverse (List.map viewMessage model.messages))
         , input [ (onInput MessageInput), (value model.messageInput) ] []
-        , button [ onClick Send ] [ text "Send" ]
+        , button
+            [ (onClick Send)
+            , (disabled (String.isEmpty model.messageInput))
+            ]
+            [ text "Send" ]
         ]
 
 
