@@ -2,9 +2,10 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.App as Html
+import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as Encode
-import Json.Decode as Decode exposing (..)
+import Json.Decode as Decode exposing ((:=))
 import Ports exposing (sendMessage, receiveMessage)
 
 
@@ -79,7 +80,7 @@ update msg model =
             ( { model | messages = (decodeMessage json) :: model.messages }, Cmd.none )
 
         SetName ->
-            ( { model | user = Named model.nameInput }, Cmd.none )
+            ( { model | user = Named model.nameInput, nameInput = "" }, Cmd.none )
 
 
 newMessageJson : Model -> Encode.Value
@@ -165,7 +166,7 @@ nameOf user =
 nameInput : Model -> Html Msg
 nameInput model =
     div []
-        [ input [ onInput NameInput ] []
+        [ input [ (onInput NameInput), (value model.nameInput) ] []
         , button [ onClick SetName ] [ text "Set Name" ]
         ]
 
@@ -174,7 +175,7 @@ messages : Model -> Html Msg
 messages model =
     div []
         [ div [] (List.reverse (List.map viewMessage model.messages))
-        , input [ onInput MessageInput ] []
+        , input [ (onInput MessageInput), (value model.messageInput) ] []
         , button [ onClick Send ] [ text "Send" ]
         ]
 
