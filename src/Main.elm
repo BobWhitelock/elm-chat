@@ -167,7 +167,11 @@ nameOf user =
 nameInput : Model -> Html Msg
 nameInput model =
     div []
-        [ input [ (onInput NameInput), (value model.nameInput) ] []
+        [ input
+            [ (onInput NameInput)
+            , (value model.nameInput)
+            ]
+            []
         , button
             [ (onClick SetName)
             , (disabled (String.isEmpty model.nameInput))
@@ -180,15 +184,26 @@ messages : Model -> Html Msg
 messages model =
     div []
         [ div [] (List.reverse (List.map viewMessage model.messages))
-        , input [ (onInput MessageInput), (value model.messageInput) ] []
+        , messageInput model
+        ]
+
+
+viewMessage : Message -> Html Msg
+viewMessage message =
+    div [] [ text (message.user ++ ": " ++ message.content) ]
+
+
+messageInput : Model -> Html Msg
+messageInput model =
+    div []
+        [ input
+            [ (onInput MessageInput)
+            , (value model.messageInput)
+            ]
+            []
         , button
             [ (onClick Send)
             , (disabled (String.isEmpty model.messageInput))
             ]
             [ text "Send" ]
         ]
-
-
-viewMessage : Message -> Html msg
-viewMessage message =
-    div [] [ text (message.user ++ ": " ++ message.content) ]
