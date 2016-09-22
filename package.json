@@ -1,12 +1,13 @@
 {
-  "name": "faye_server",
+  "name": "elm-chat",
   "version": "1.0.0",
-  "description": "",
+  "description": "NPM dependencies for Elm chat app",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Bob Whitelock",
+  "repository": "https://github.com/BobWhitelock/elm-chat.git",
   "license": "MIT",
   "dependencies": {
     "faye": "^1.2.2"
