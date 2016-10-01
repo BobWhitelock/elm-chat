@@ -156,16 +156,35 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ userInfo model
-        , nameInput model
+    div [ class "app" ]
+        [ topBar model
         , messages model
+        ]
+
+
+topBar : Model -> Html Msg
+topBar model =
+    nav [ class "top-bar" ]
+        [ div [ class "top-bar-left" ]
+            [ ul [ class "dropdown menu" ]
+                [ li [ class "menu-text" ] [ text "Elm Chat" ]
+                ]
+            ]
+        , div [ class "top-bar-right" ]
+            [ ul [ class "menu" ]
+                ((userInfo model) :: (nameInput model))
+            ]
         ]
 
 
 userInfo : Model -> Html Msg
 userInfo model =
-    span [] [ text ("You are currently " ++ (nameOf model.user)) ]
+    li [ class "menu-text" ]
+        [ span []
+            [ span [ class "name-preamble" ] [ text "You are currently " ]
+            , em [ class "name" ] [ text (nameOf model.user) ]
+            ]
+        ]
 
 
 nameOf : User -> String
@@ -178,46 +197,68 @@ nameOf user =
             "anonymous"
 
 
-nameInput : Model -> Html Msg
+nameInput : Model -> List (Html Msg)
 nameInput model =
-    div []
+    [ li []
         [ input
             [ (onInput NameInput)
             , (value model.nameInput)
+            , (type' "text")
+            , (placeholder "Who are you?")
             ]
             []
-        , button
+        ]
+    , li []
+        [ button
             [ (onClick SetName)
             , (disabled (String.isEmpty model.nameInput))
+            , (type' "button")
+            , (class "button")
             ]
             [ text "Set Name" ]
         ]
+    ]
 
 
 messages : Model -> Html Msg
 messages model =
-    div []
-        [ div [] (List.map viewMessage model.messages)
-        , messageInput model
-        ]
+    div [ class "column row" ]
+        (List.append
+            (List.map viewMessage model.messages)
+            (messageInput model)
+        )
 
 
 viewMessage : Message -> Html Msg
 viewMessage message =
-    div [] [ text (message.user ++ ": " ++ message.content) ]
+    div [ class "message column" ]
+        [ (div [ class "small-3 columns message-user" ]
+            [ text message.user ]
+          )
+        , (div
+            [ class "small-9 columns message-content" ]
+            [ text message.content ]
+          )
+        ]
 
 
-messageInput : Model -> Html Msg
+messageInput : Model -> List (Html Msg)
 messageInput model =
-    div []
+    [ div
+        [ class "row small-12 columns" ]
         [ input
-            [ (onInput MessageInput)
+            [ (type' "text")
+            , (onInput MessageInput)
             , (value model.messageInput)
             ]
             []
-        , button
-            [ (onClick Send)
+        ]
+    , div [ class "row small-12 columns" ]
+        [ button
+            [ (class "expanded button")
+            , (onClick Send)
             , (disabled (String.isEmpty model.messageInput))
             ]
             [ text "Send" ]
         ]
+    ]

@@ -1,5 +1,41 @@
 
+@import 'colors';
 @import 'settings';
 @import 'foundation';
 
 @include foundation-everything;
+
+.html, .body, .app {
+  height: 100%;
+}
+
+.app {
+  background-color: #EFE;
+}
+
+.message, .top-bar {
+  margin-bottom: 10px;
+}
+
+.message {
+  border: 1px solid $color-primary-3;
+  padding: 0;
+}
+
+.name-preamble {
+  color: $color-primary-4;
+}
+
+.name {
+  color: $color-complement-4;
+  font-weight: bold;
+}
+
+.message-user {
+  text-align: center;
+  background-color: $color-primary-1;
+}
+
+.message-content {
+  background-color: $color-primary-2;
+}
