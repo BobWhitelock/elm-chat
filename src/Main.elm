@@ -1,12 +1,14 @@
 module Main exposing (..)
 
+import Dom
 import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick, onInput, onSubmit)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing ((:=))
 import String
+import Task
 import List
 import Ports exposing (sendMessage, receiveMessage)
 
@@ -59,16 +61,22 @@ init =
 
 
 type Msg
-    = MessageInput String
+    = NoOp
+    | MessageInput String
     | NameInput String
     | Send
     | NewMessage Encode.Value
     | SetName
+    | FocusMessageInputSuccess
+    | FocusMessageInputFailure
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         MessageInput newInput ->
             ( { model | messageInput = newInput }, Cmd.none )
 
@@ -79,7 +87,7 @@ update msg model =
             ( { model
                 | messageInput = ""
               }
-            , sendMessage (newMessageJson model)
+            , Cmd.batch [ (sendMessage (newMessageJson model)), focusMessageInput ]
             )
 
         NewMessage json ->
@@ -94,8 +102,19 @@ update msg model =
                 | user = Named model.nameInput
                 , nameInput = ""
               }
-            , Cmd.none
+            , focusMessageInput
             )
+
+        FocusMessageInputSuccess ->
+            ( (Debug.log "success" model), Cmd.none )
+
+        FocusMessageInputFailure ->
+            ( (Debug.log "failure " model), Cmd.none )
+
+
+noOp : x -> Msg
+noOp x =
+    NoOp
 
 
 newMessageJson : Model -> Encode.Value
@@ -141,6 +160,14 @@ attemptDecodeMessage json =
         Decode.decodeValue decoder json
 
 
+focusMessageInput : Cmd Msg
+focusMessageInput =
+    Task.perform
+        (\x -> FocusMessageInputFailure)
+        (\x -> FocusMessageInputSuccess)
+        (Dom.focus messageInputId)
+
+
 
 -- SUBSCRIPTIONS
 
@@ -170,7 +197,10 @@ topBar model =
                 [ li [ class "menu-text" ] [ text "Elm Chat" ]
                 ]
             ]
-        , div [ class "top-bar-right" ]
+        , Html.form
+            [ (onSubmit NoOp)
+            , (class "top-bar-right")
+            ]
             [ ul [ class "menu" ]
                 ((userInfo model) :: (nameInput model))
             ]
@@ -212,7 +242,7 @@ nameInput model =
         [ button
             [ (onClick SetName)
             , (disabled (String.isEmpty model.nameInput))
-            , (type' "button")
+            , (type' "submit")
             , (class "button")
             ]
             [ text "Set Name" ]
@@ -222,7 +252,10 @@ nameInput model =
 
 messages : Model -> Html Msg
 messages model =
-    div [ class "column row" ]
+    Html.form
+        [ (onSubmit NoOp)
+        , (class "column row")
+        ]
         (List.append
             (List.map viewMessage model.messages)
             (messageInput model)
@@ -248,8 +281,10 @@ messageInput model =
         [ class "row small-12 columns" ]
         [ input
             [ (type' "text")
+            , (id messageInputId)
             , (onInput MessageInput)
             , (value model.messageInput)
+            , (autofocus True)
             ]
             []
         ]
@@ -262,3 +297,8 @@ messageInput model =
             [ text "Send" ]
         ]
     ]
+
+
+messageInputId : String
+messageInputId =
+    "message-input"
